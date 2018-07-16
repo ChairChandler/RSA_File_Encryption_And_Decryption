@@ -25,7 +25,8 @@ static void menu()
 			sleep(1);
 			
 			
-			system("cls");
+			for(int i=0;i<100;i++)
+				cout<<endl;
 			
 			switch(sign)
 			{
@@ -34,7 +35,8 @@ static void menu()
 				case '3': { repeat=false; 				} break;
 			}
 			
-			system("cls");
+			for(int i=0;i<100;i++)
+				cout<<endl;
 			
 		}while(repeat == true);
 		
