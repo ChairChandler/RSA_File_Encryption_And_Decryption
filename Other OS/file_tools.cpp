@@ -25,7 +25,7 @@ long long fileSize(std::string &fileName)
 	long long fSize;
 	std::fstream file;
 	
-	file.open(fileName.c_str(), std::ios::in|std::ios::out|std::ios::binary);
+	file.open(fileName, std::ios::in|std::ios::out|std::ios::binary);
 	
 	fSize=file.tellg();
 	file.seekg(0, std::ios::end);
