@@ -11,11 +11,11 @@ typedef char 	Byte;
 
 static std::string	TMP_FILE_NAME		=	"tmp.txt";
 static const int	ENCODE_BUFF_SIZE	=	256;
-static bool			FILE_END			=	false;
-static Byte			SPACE_CHAR_LENGTH	=	1;;
+static bool         FILE_END            =	false;
+static Byte         SPACE_CHAR_LENGTH	=	1;
 
 static Buffer	readFile(std::string &fileName);
-static bool		writeFile(BigDec *numbers, size_t length, std::string &fileName);
+static bool     writeFile(BigDec *numbers, size_t length, std::string &fileName);
 
 bool encryptFile(RSA &key, std::string &fileName)
 {

@@ -5,7 +5,7 @@
 #include "RSA.hpp"
 #include "file_tools.hpp"
 
-static char		INFO_FILE_NAME[]	=	"info.txt";
+static char	INFO_FILE_NAME[] = "info.txt";
 
 bool copyFile(std::string &fileName, std::string &tmpName)
 {

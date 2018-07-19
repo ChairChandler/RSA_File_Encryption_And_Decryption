@@ -5,12 +5,12 @@
 #include "file_tools.hpp"
 #include "decrypt_file.hpp"
 
-static const int	DECODE_BUFF_SIZE	=	512;
+static const int	DECODE_BUFF_SIZE = 512;
 extern std::string	TMP_FILE_NAME;
-extern bool			FILE_END;
+extern bool         FILE_END;
 
 static BigDec* readFile(std::string &fileName, size_t &retLength);
-static bool writeFile(std::string &text, std::string &fileName);
+static bool    writeFile(std::string &text, std::string &fileName);
 
 bool decryptFile(RSA &key, std::string &fileName)
 {
