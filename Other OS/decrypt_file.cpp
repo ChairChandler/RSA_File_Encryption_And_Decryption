@@ -1,109 +1,127 @@
-#include <string>
+#include "decrypt_file.h"
 #include <fstream>
-#include "BigDec.hpp"
-#include "RSA.hpp"
-#include "file_tools.hpp"
-#include "decrypt_file.hpp"
+#include "BigDec.h"
+#include "file_tools.h"
+#include "encrypt_file.h"
 
-static const int DECODE_BUFF_SIZE = 512;
-extern std::string TMP_FILE_NAME;
-extern bool FILE_END;
-
-static BigDec* readFile(std::string &fileName, size_t &retLength);
-static bool writeFile(std::string &text, std::string &fileName);
-
-bool decryptFile(RSA &key, std::string &fileName)
+namespace FILE_decrypt_file_NS
 {
-	std::string message;
-	size_t returnLength;
-	BigDec *numbers;
-	
-	while(FILE_END == false)
-	{
-		numbers=readFile(fileName, returnLength);
-		message=key.decrypt(numbers, returnLength);
-		delete[] numbers;
-		
-		if(writeFile(message, TMP_FILE_NAME) == false)
-			return false;
-	}
-	
-	return copyFile(fileName, TMP_FILE_NAME);
-}
+    static const int DECODE_BUFF_SIZE = 256;
 
-static BigDec* readFile(std::string &fileName, size_t &returnLength)
-{
-	static size_t state=0;
-	static size_t fSize=fileSize(fileName);
-	static std::ifstream file(fileName, std::ios::binary);
-	
-	int i=0;
-	char readedChar;
-	bool readingNumbers=true;
-	std::string auxString;
-	BigDec *numbers;
-	
-	numbers=new BigDec[DECODE_BUFF_SIZE];
+    static bool isFileEnded = false;
 
-	while(state < fSize)
-	{
-		file.read((char*)&readedChar,1);
-		state++;
-		
-			if(state >= fSize)
-			{	
-				convertString(auxString, true);
-				
-				BigDec tmp(auxString);
-				numbers[i]=tmp;
-				
-				returnLength=i+1;
-				FILE_END=true;
-				file.close();
-				
-				break;
-			}
-			else if(readedChar == ' ')
-			{
-				if(readingNumbers == true)
-					readingNumbers=false;
-				
-				convertString(auxString, true);
-				
-				BigDec tmp(auxString);
-				numbers[i]=tmp;
-				
-				if(i+1 == DECODE_BUFF_SIZE)
-				{
-					returnLength=DECODE_BUFF_SIZE;
-					break;
-				}
-				continue;
-				
-			}
-			else if(readingNumbers == false)
-			{
-				readingNumbers=true;
-				auxString.clear();
-				i++;
-			}
-		
-		auxString+=readedChar;
-		
-	}
-	
-	return numbers;
-}
+    static BigDec_NS::BigDec* readFile(std::string &fileName, size_t &retLength);
+    static bool writeFile(std::string &text, std::string &fileName);
 
-static bool writeFile(std::string &text, std::string &fileName)
-{
-	static size_t state=0;
-	static std::fstream file(fileName, std::ios::out|std::ios::in|std::ios::app|std::ios::binary);
-	
-	file.write(text.c_str(), text.size());
-	
-	if(FILE_END == true)
-		file.close();
-	
-	return true;
+
+    bool decryptFile(RSA_NS::RSA &key, std::string &fileName)
+    {
+        std::string message;
+        size_t returnLength;
+        BigDec_NS::BigDec *numbers;
+
+        isFileEnded=false;
+
+        while(isFileEnded == false)
+        {
+            numbers=readFile(fileName, returnLength);
+            message=key.decrypt(numbers, returnLength);
+
+
+            delete[] numbers;
+
+
+            if(writeFile(message, const_cast<std::string&>(FILE_encrypt_file_NS::TMP_FILE_NAME)) == false)
+            {
+                return false;
+            }
+        }
+
+        return FILE_file_tools_NS::copyFile(fileName, const_cast<std::string&>(FILE_encrypt_file_NS::TMP_FILE_NAME));
+    }
+
+    static BigDec_NS::BigDec* readFile(std::string &fileName, size_t &returnLength)
+    {
+        static size_t state = 0;
+        static long long fSize = FILE_file_tools_NS::fileSize(fileName);
+        static std::ifstream file(fileName, std::ios::binary);
+
+        if(file.is_open() == false)
+        {
+            file.open(fileName, std::ios::binary);
+            state = 0;
+        }
+
+        BigDec_NS::BigDec *numbers;
+        std::string auxString;
+        size_t counter = 0;
+        char readedChar;
+
+
+        numbers=new BigDec_NS::BigDec[DECODE_BUFF_SIZE];
+
+
+        while(state < fSize)
+        {
+            file.read(static_cast<char*>(&readedChar), 1);
+            state++;
+
+
+            if(state >= fSize)
+            {
+                FILE_file_tools_NS::convertString(auxString, true);
+
+                numbers[counter]=BigDec_NS::BigDec(auxString);
+
+                returnLength=counter+1;
+                isFileEnded=true;
+                file.close();
+
+                break;
+            }
+            else if(readedChar == ' ')
+            {
+                FILE_file_tools_NS::convertString(auxString, true);
+
+                numbers[counter]=BigDec_NS::BigDec(auxString);
+                auxString.clear();
+
+
+                if((counter+1) == DECODE_BUFF_SIZE)
+                {
+                    returnLength=DECODE_BUFF_SIZE;
+                    break;
+                }
+                else
+                {
+                    counter++;
+                }
+            }
+            else
+            {
+                auxString += readedChar;
+            }
+        }
+
+        return numbers;
+    }
+
+    static bool writeFile(std::string &text, std::string &fileName)
+    {
+        static std::fstream file(fileName, std::ios::out|std::ios::in|std::ios::app|std::ios::binary);
+
+        if(file.is_open() == false)
+        {
+            file.open(fileName, std::ios::out|std::ios::in|std::ios::app|std::ios::binary);
+        }
+
+        file.write(text.c_str(), static_cast<std::streamsize>(text.size()));
+
+        if(isFileEnded == true)
+        {
+            file.close();
+        }
+
+        return true;
+    }
 }
